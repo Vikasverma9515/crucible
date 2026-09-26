@@ -37,6 +37,9 @@ export interface AgentTask {
   completed: boolean;
   failed: boolean;
   tickAssigned: number;
+  // snake_case aliases from Python
+  tick_assigned?: number;
+  tick_deadline?: number;
   tickDeadline?: number;
 }
 

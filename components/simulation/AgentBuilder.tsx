@@ -76,10 +76,10 @@ function newAgent(i: number): AgentDraft {
   const meta = PROVIDER_OPTIONS.find((p) => p.value === provider)!;
   return {
     id: `draft_${i}_${Date.now()}`,
-    name: meta.label.split(" ")[0],
-    provider,
-    model: meta.models[0],
-    personalityPrompt: DEFAULT_PERSONALITIES[provider],
+    name: meta.label.split(" ")[0] ?? meta.label,
+    provider: provider as AgentProvider,
+    model: meta.models[0] ?? "",
+    personalityPrompt: provider ? (DEFAULT_PERSONALITIES[provider] ?? "") : "",
     apiKey: "",
   };
 }
@@ -102,9 +102,9 @@ export default function AgentBuilder({
         const updated = { ...a, ...patch };
         // Auto-update personality when provider changes
         if (patch.provider && patch.provider !== a.provider) {
-          updated.personalityPrompt = DEFAULT_PERSONALITIES[patch.provider];
-          updated.model = PROVIDER_OPTIONS.find((p) => p.value === patch.provider)!.models[0];
-          updated.name = PROVIDER_OPTIONS.find((p) => p.value === patch.provider)!.label.split(" ")[0];
+          updated.personalityPrompt = DEFAULT_PERSONALITIES[patch.provider] ?? "";
+          updated.model = PROVIDER_OPTIONS.find((p) => p.value === patch.provider)!.models[0] ?? "";
+          updated.name = PROVIDER_OPTIONS.find((p) => p.value === patch.provider)!.label.split(" ")[0] ?? "";
           updated.apiKey = "";
         }
         return updated;

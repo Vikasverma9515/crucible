@@ -8,7 +8,7 @@ import EventLog from "components/simulation/EventLog";
 import Controls from "components/simulation/Controls";
 import AgentBuilder, { type AgentDraft } from "components/simulation/AgentBuilder";
 
-const WorldCanvas = dynamic(() => import("components/simulation/WorldCanvas"), { ssr: false });
+const PhaserCanvas = dynamic(() => import("components/simulation/PhaserCanvas"), { ssr: false });
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
 const WS_BACKEND = BACKEND.replace(/^http/, "ws");
@@ -143,8 +143,8 @@ export default function SimulationPage() {
           </aside>
 
           {/* Main canvas */}
-          <main className="flex flex-1 items-start justify-center overflow-auto p-4">
-            <WorldCanvas state={state} />
+          <main className="flex flex-1 overflow-hidden">
+            <PhaserCanvas state={state} />
           </main>
 
           {/* Right panel */}
