@@ -1,32 +1,37 @@
 @import "tailwindcss";
 
 @plugin "@tailwindcss/container-queries";
-@plugin "@tailwindcss/typography";
 
 @layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
-  }
-}
-
-@media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
   }
-}
 
-@supports (font: -apple-system-body) and (-webkit-appearance: none) {
-  img[loading="lazy"] {
-    clip-path: inset(0.6px);
+  *,
+  ::after,
+  ::before,
+  ::backdrop {
+    border-color: rgba(255, 255, 255, 0.08);
+    box-sizing: border-box;
   }
-}
 
-a,
-input,
-button {
-  @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50 dark:focus-visible:ring-neutral-600 dark:focus-visible:ring-offset-neutral-900;
+  ::selection {
+    background-color: rgba(124, 58, 237, 0.4);
+    color: #fff;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
 }
