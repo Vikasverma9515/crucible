@@ -80,6 +80,14 @@ export interface WorldEvent {
   severity: "info" | "warning" | "danger" | "success";
 }
 
+export interface AgentConfig {
+  name: string;
+  provider: AgentProvider;
+  model: string;
+  personalityPrompt: string;
+  apiKey?: string;
+}
+
 export interface WorldState {
   tick: number;
   phase: "day" | "night";

@@ -97,6 +97,7 @@ def create_initial_state(configs: list[AgentConfig]) -> WorldState:
             personality_prompt=cfg.personality_prompt,
             position=pos,
             color=meta["color"],
+            api_key=cfg.api_key or None,
         ))
 
     return WorldState(

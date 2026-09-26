@@ -63,6 +63,7 @@ class Agent(BaseModel):
     kills: int = 0
     ticks_alive: int = 0
     color: str = "#7C3AED"
+    api_key: Optional[str] = None  # stored in memory only, never broadcast
     current_task: Optional[AgentTask] = None
     completed_tasks: int = 0
     failed_tasks: int = 0
@@ -94,6 +95,7 @@ class AgentConfig(BaseModel):
     provider: AgentProvider
     model: str
     personality_prompt: str
+    api_key: Optional[str] = None  # per-agent key from frontend
 
 
 class SimulationConfig(BaseModel):

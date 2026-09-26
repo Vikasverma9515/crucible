@@ -45,6 +45,14 @@ PRESET_SCENARIOS = {
 }
 
 # ── Broadcast ─────────────────────────────────────────────────────────────────
+def safe_state_dump(s: WorldState) -> dict:
+    """Dump state but strip api_key from every agent before sending to clients."""
+    d = s.model_dump()
+    for agent in d.get("agents", []):
+        agent.pop("api_key", None)
+    return d
+
+
 async def broadcast(data: dict) -> None:
     dead: set[WebSocket] = set()
     payload = json.dumps(data)
@@ -65,7 +73,7 @@ async def run_ticks() -> None:
             break
         try:
             state = await tick(state)
-            await broadcast(state.model_dump())
+            await broadcast(safe_state_dump(state))
         except Exception as e:
             print(f"Tick error: {e}")
 
@@ -126,7 +134,7 @@ async def start(req: StartRequest = StartRequest()):
                 tick_deadline=60,
             )
 
-    await broadcast(state.model_dump())
+    await broadcast(safe_state_dump(state))
     tick_task = asyncio.create_task(run_ticks())
     return {"ok": True, "tick": state.tick, "agent_count": len(state.agents)}
 
@@ -139,7 +147,7 @@ async def stop():
         tick_task.cancel()
     if state:
         state.running = False
-        await broadcast(state.model_dump())
+        await broadcast(safe_state_dump(state))
     return {"ok": True}
 
 
@@ -154,7 +162,7 @@ async def inject(req: InjectRequest):
         return {"ok": False, "error": "no simulation"}
     state.events.append(WorldEvent(tick=state.tick, type="boss",
                                    message=f"👑 BOSS: {req.message}", severity="warning"))
-    await broadcast(state.model_dump())
+    await broadcast(safe_state_dump(state))
     return {"ok": True}
 
 
@@ -189,7 +197,7 @@ async def assign_task(req: TaskRequest):
         message=f"👑 TASK: \"{req.description}\" → {', '.join(a.name for a in targets)}",
         severity="warning",
     ))
-    await broadcast(state.model_dump())
+    await broadcast(safe_state_dump(state))
     return {"ok": True, "assigned_to": [a.name for a in targets]}
 
 
@@ -205,14 +213,14 @@ async def clear_task(req: ClearTaskRequest = ClearTaskRequest()):
     targets = [a for a in state.agents if a.alive and (req.agent_id is None or a.id == req.agent_id)]
     for a in targets:
         a.current_task = None
-    await broadcast(state.model_dump())
+    await broadcast(safe_state_dump(state))
     return {"ok": True}
 
 
 # ── State snapshot ────────────────────────────────────────────────────────────
 @app.get("/api/state")
 async def get_state():
-    return {"ok": bool(state), "state": state.model_dump() if state else None}
+    return {"ok": bool(state), "state": safe_state_dump(state) if state else None}
 
 
 # ── WebSocket ─────────────────────────────────────────────────────────────────
@@ -222,7 +230,7 @@ async def websocket_endpoint(ws: WebSocket):
     clients.add(ws)
     try:
         if state:
-            await ws.send_text(json.dumps(state.model_dump()))
+            await ws.send_text(json.dumps(safe_state_dump(state)))
         while True:
             await ws.receive_text()
     except WebSocketDisconnect:

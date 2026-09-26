@@ -104,14 +104,21 @@ Survival: Hunger increases 7/tick. Above 75 hunger = -5 HP/tick. Eat inventory f
 async def get_decision(agent: Agent, state: WorldState) -> AgentDecision:
     has_task = agent.current_task is not None and not agent.current_task.completed
 
+    # Per-agent key takes priority over env var
+    claude_key = agent.api_key if agent.provider == "claude" else None
+    claude_key = claude_key or os.getenv("ANTHROPIC_API_KEY")
+
+    openai_key = agent.api_key if agent.provider == "gpt4" else None
+    openai_key = openai_key or os.getenv("OPENAI_API_KEY")
+
     # Try Claude API
-    if agent.provider == "claude" and (key := os.getenv("ANTHROPIC_API_KEY")):
+    if agent.provider == "claude" and claude_key:
         try:
             import httpx
             async with httpx.AsyncClient(timeout=10) as client:
                 r = await client.post(
                     "https://api.anthropic.com/v1/messages",
-                    headers={"x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json"},
+                    headers={"x-api-key": claude_key, "anthropic-version": "2023-06-01", "content-type": "application/json"},
                     json={"model": agent.model, "max_tokens": 250, "messages": [{"role": "user", "content": build_prompt(agent, state)}]},
                 )
                 if r.status_code == 200:
@@ -123,13 +130,13 @@ async def get_decision(agent: Agent, state: WorldState) -> AgentDecision:
             pass
 
     # Try OpenAI API
-    if agent.provider == "gpt4" and (key := os.getenv("OPENAI_API_KEY")):
+    if agent.provider == "gpt4" and openai_key:
         try:
             import httpx
             async with httpx.AsyncClient(timeout=10) as client:
                 r = await client.post(
                     "https://api.openai.com/v1/chat/completions",
-                    headers={"Authorization": f"Bearer {key}", "content-type": "application/json"},
+                    headers={"Authorization": f"Bearer {openai_key}", "content-type": "application/json"},
                     json={"model": agent.model, "max_tokens": 250, "messages": [{"role": "user", "content": build_prompt(agent, state)}]},
                 )
                 if r.status_code == 200:
